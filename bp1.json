@@ -1,1 +1,79 @@
 ["165.225.240.0/23", "165.225.240.12", "136.226.204.0/23", "136.226.206.0/23", "136.226.198.0/23", "136.226.208.0/23", "136.226.200.0/23", "136.226.210.0/23", "136.226.202.0/23", "136.226.212.0/23", "147.161.132.0/23", "147.161.156.0/23", "185.46.212.0/23", "185.46.212.32", "147.161.158.0/23", "147.161.172.0/23", "147.161.156.0/23", "136.226.208.0/23", "147.161.158.0/23", "136.226.210.0/23", "165.225.12.0/23", "165.225.12.12", "136.226.212.0/23", "136.226.198.0/23", "136.226.200.0/23", "136.226.202.0/23", "136.226.204.0/23", "147.161.148.0/23", "136.226.206.0/23", "196.23.154.64/27", "196.23.154.86", "136.226.216.0/23", "136.226.216.12", "136.226.212.0/23", "147.161.154.0/23", "147.161.156.0/23", "136.226.198.0/23", "165.225.194.0/23", "165.225.194.12", "147.161.158.0/23", "136.226.200.0/23", "136.226.202.0/23", "136.226.204.0/23", "136.226.206.0/23", "136.226.208.0/23", "136.226.210.0/23", "147.161.160.0/23", "147.161.160.12", "147.161.230.0/23", "147.161.226.20", "136.226.198.0/23", "136.226.200.0/23", "136.226.202.0/23", "136.226.204.0/23", "136.226.170.0/23", "136.226.206.0/23", "147.161.156.0/23", "136.226.172.0/23", "136.226.208.0/23", "147.161.158.0/23", "136.226.210.0/23", "136.226.212.0/23", "147.161.226.0/23", "147.161.226.20", "147.161.228.0/23", "147.161.226.20", "136.226.202.0/23", "136.226.204.0/23", "136.226.206.0/23", "136.226.208.0/23", "136.226.210.0/23", "147.161.234.0/23", "165.225.72.32", "136.226.212.0/23", "147.161.156.0/23", "147.161.254.0/23", "165.225.72.0/22", "165.225.72.32", "147.161.158.0/23", "165.225.26.0/23", "165.225.26.12", "147.161.164.0/23", "136.226.198.0/23", "136.226.200.0/23", "136.226.208.0/23", "136.226.164.0/23", "136.226.210.0/23", "147.161.134.0/23", "147.161.134.20", "136.226.162.0/23", "136.226.212.0/23", "147.161.136.0/23", "147.161.134.20", "147.161.156.0/23", "147.161.138.0/23", "147.161.134.20", "147.161.158.0/23", "136.226.198.0/23", "136.226.200.0/23", "136.226.202.0/23"]
+
+
+
+import boto3
+import requests
+from github import Github
+
+repository_owner = 'your-github-username'
+repository_name = 'your-github-repository'
+github_app_id = 'your-github-app-id'
+github_app_private_key = 'your-github-app-private-key'
+
+s3 = boto3.client('s3')
+
+def lambda_handler(event, context):
+    try:
+        # Retrieve the file from S3
+        bucket_name = event['Records'][0]['s3']['bucket']['name']
+        key = event['Records'][0]['s3']['object']['key']
+        file_obj = s3.get_object(Bucket=bucket_name, Key=key)
+        file_content = file_obj['Body'].read()
+
+        # Create a GitHub token using the GitHub App
+        github_token = create_github_token()
+
+        # Upload the file to GitHub using PyGithub library
+        upload_to_github(file_content, key, github_token)
+
+        return {
+            'statusCode': 200,
+            'body': 'File uploaded successfully to GitHub repository.'
+        }
+    except Exception as e:
+        print(f'Error uploading file to GitHub: {str(e)}')
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while uploading the file to GitHub repository.'
+        }
+
+def create_github_token():
+    installation_id = get_github_app_installation_id()
+    installation_token_url = f'https://api.github.com/app/installations/{installation_id}/access_tokens'
+    private_key = github_app_private_key.replace('\\n', '\n')
+
+    response = requests.post(
+        installation_token_url,
+        headers={
+            'Authorization': f'Bearer {generate_github_app_token()}',
+            'Accept': 'application/vnd.github.v3+json'
+        }
+    )
+    response.raise_for_status()
+    return response.json()['token']
+
+def upload_to_github(file_content, file_name, github_token):
+    g = Github(github_token)
+    repo = g.get_repo(f'{repository_owner}/{repository_name}')
+    repo.create_file(file_name, 'Upload file', file_content)
+
+def generate_github_app_token():
+    import jwt
+    import time
+
+    now = int(time.time())
+    expiration_time = now + (10 * 60)  # Token expires in 10 minutes
+    payload = {
+        'iat': now,
+        'exp': expiration_time,
+        'iss': github_app_id
+    }
+
+    token = jwt.encode(payload, github_app_private_key, algorithm='RS256')
+    return token.decode('utf-8')
+
+def get_github_app_installation_id():
+    # Replace this function with your own logic to get the installation ID of your GitHub App
+    # For example, you can store the installation ID in an environment variable or database
+    return 'your-github-app-installation-id'
