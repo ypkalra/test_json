@@ -28,3 +28,9 @@ jobs:
 
       - name: Show chunks
         run: ls -l
+
+      - name: Copy chunks to repository
+        uses: actions/upload-artifact@v2
+        with:
+          name: Chunked Files
+          path: ./bp_1*.json
