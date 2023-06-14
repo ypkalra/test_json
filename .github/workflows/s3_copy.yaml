@@ -24,7 +24,7 @@ jobs:
 
       - name: Chunk file into JSON
         run: |
-          split -l 100 --additional-suffix=.json ip_addresses.csv bp_1
+          split -l 100 --additional-suffix=.json ip_addresses.csv bpbp_1
 
       - name: Show chunks
         run: ls -l
@@ -33,4 +33,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Chunked Files
-          path: ./bp_1*.json
+          path: ./bpbp_1*.json
