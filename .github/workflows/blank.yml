@@ -33,29 +33,7 @@ jobs:
 
       - name: Download file from S3 bucket
         run: |
-          python -c "import boto3; s3 = boto3.client('s3', region_name='${{ env.AWS_REGION }}'); s3.download_file('${{ env.S3_BUCKET }}', '${{ env.FILE_KEY }}', 'downloaded-file.csv')"
+          python -c "import boto3; s3 = boto3.client('s3', region_name='${{ env.AWS_REGION }}'); s3.download_file('${{ env.S3_BUCKET }}', '${{ env.FILE_KEY }}', 'ip_addresses.csv')"
 
-      - name: Chunk the file
-        run: |
-          $chunkSize = ${{ env.CHUNK_SIZE }}
-          $filePath = "downloaded-file.csv"
-          $chunkIndex = 0
 
-          $fileStream = [System.IO.File]::OpenRead($filePath)
-          $buffer = New-Object byte[] $chunkSize
-
-          while ($fileStream.Position -lt $fileStream.Length) {
-              $bytesRead = $fileStream.Read($buffer, 0, $chunkSize)
-              $chunkFile = "chunk-$chunkIndex.json"
-              [System.IO.File]::WriteAllBytes($chunkFile, $buffer, 0, $bytesRead)
-              $chunkIndex++
-          }
-
-          $fileStream.Dispose()
-
-      - name: Upload chunks to artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: chunks
-          path: |
-            chunk-*.json
+          
