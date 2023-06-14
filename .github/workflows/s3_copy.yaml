@@ -24,7 +24,7 @@ jobs:
 
       - name: Chunk file into JSON
         run: |
-          split -l 100 --additional-suffix=.json file.txt chunk_
+          split -l 100 --additional-suffix=.json ip_addresses.csv chunk_
 
       - name: Show chunks
         run: ls -l
