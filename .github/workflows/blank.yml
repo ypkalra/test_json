@@ -35,7 +35,7 @@ jobs:
         run: |
           python -c "import boto3; s3 = boto3.client('s3', region_name='${{ env.AWS_REGION }}'); s3.download_file('${{ env.S3_BUCKET }}', '${{ env.FILE_KEY }}', 'downloaded-file.txt')"
 
-      - name: Chunk the file
+      - name: Chunk the fileadd
         run: |
           $chunkSize = ${{ env.CHUNK_SIZE }}
           $filePath = "downloaded-file.txt"
