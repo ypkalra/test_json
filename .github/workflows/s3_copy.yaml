@@ -24,13 +24,27 @@ jobs:
 
       - name: Chunk file into JSON
         run: |
-          split -l 100 --additional-suffix=.json ip_addresses.csv bpbp_1
+            split -l 150 --additional-suffix=.json ip_addresses.csv chunk_
 
       - name: Show chunks
         run: ls -l
-
-      - name: Copy chunks to repository
-        uses: actions/upload-artifact@v2
-        with:
-          name: Chunked Files
-          path: ./bpbp_1*.json
+  
+      - name: Rename and copy chunks to repository
+        run: |
+            mkdir -p path/to/destination/folder
+            i=1
+            for file in ./chunk_*.json; do
+              cp "$file" "/bp$i.json"
+              i=$((i+1))
+            done
+  
+      - name: Set Git user email and name
+        run: |
+            git config --local user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+            git config --local user.name "${GITHUB_ACTOR}"
+    
+      - name: Commit and push changes
+        run: |
+            git add /
+            git commit -m "Add chunked files"
+            git push
