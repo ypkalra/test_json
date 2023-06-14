@@ -22,5 +22,9 @@ jobs:
       - name: Download file from S3
         run: aws s3 cp s3://yashbucket-0622/ip_addresses.csv .
 
-      - name: Show downloaded file
+      - name: Chunk file into JSON
+        run: |
+          split -l 100 --additional-suffix=.json file.txt chunk_
+
+      - name: Show chunks
         run: ls -l
