@@ -7,8 +7,8 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  AWS_ACCESS_KEY_ID: "A6SzQAhjbOmdEtogvcnN07c/biKhguTgAiOuZwEW"
-  AWS_SECRET_ACCESS_KEY: "AKIATHS5MDWQZPHHXD7I"
+  AWS_ACCESS_KEY_ID: "aPE9oja2l02Ip5RZBroQLYzOrqFCo5EVg3Kjya2U"
+  AWS_SECRET_ACCESS_KEY: "AKIATHS5MDWQSTJYISMO"
   S3_BUCKET: yashbucket-0622
   FILE_KEY: ip_addresses.csv
   CHUNK_SIZE: 100  # Specify the chunk size in bytes
