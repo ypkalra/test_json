@@ -33,12 +33,12 @@ jobs:
 
       - name: Download file from S3 bucket
         run: |
-          python -c "import boto3; s3 = boto3.client('s3', region_name='${{ env.AWS_REGION }}'); s3.download_file('${{ env.S3_BUCKET }}', '${{ env.FILE_KEY }}', 'downloaded-file.txt')"
+          python -c "import boto3; s3 = boto3.client('s3', region_name='${{ env.AWS_REGION }}'); s3.download_file('${{ env.S3_BUCKET }}', '${{ env.FILE_KEY }}', 'downloaded-file.csv')"
 
-      - name: Chunk the fileadd
+      - name: Chunk the file
         run: |
           $chunkSize = ${{ env.CHUNK_SIZE }}
-          $filePath = "downloaded-file.txt"
+          $filePath = "downloaded-file.csv"
           $chunkIndex = 0
 
           $fileStream = [System.IO.File]::OpenRead($filePath)
@@ -46,7 +46,7 @@ jobs:
 
           while ($fileStream.Position -lt $fileStream.Length) {
               $bytesRead = $fileStream.Read($buffer, 0, $chunkSize)
-              $chunkFile = "chunk-$chunkIndex.txt"
+              $chunkFile = "chunk-$chunkIndex.json"
               [System.IO.File]::WriteAllBytes($chunkFile, $buffer, 0, $bytesRead)
               $chunkIndex++
           }
